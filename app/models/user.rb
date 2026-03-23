@@ -37,6 +37,8 @@ class User < ApplicationRecord
     unconfirmed_email
   end
 
+  encrypts :rss_feed_key, deterministic: true
+
   def pending_email_change?
     unconfirmed_email.present?
   end
@@ -161,6 +163,26 @@ class User < ApplicationRecord
 
   def needs_onboarding?
     !onboarded?
+  end
+
+  # RSS Feed Key Management
+  def self.generate_rss_key
+    SecureRandom.hex(32)
+  end
+
+  def generate_rss_feed_key!
+    update!(rss_feed_key: self.class.generate_rss_key)
+  end
+
+  def revoke_rss_feed_key!
+    update!(rss_feed_key: nil)
+  end
+
+  def self.authenticate_rss_feed!(email, key)
+    return nil if email.blank? || key.blank?
+    user = find_by(email: email.strip.downcase)
+    return nil unless user&.rss_feed_key.present?
+    ActiveSupport::SecurityUtils.secure_compare(user.rss_feed_key, key) ? user : nil
   end
 
   private

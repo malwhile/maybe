@@ -32,6 +32,7 @@ class Family < ApplicationRecord
 
   has_many :budgets, dependent: :destroy
   has_many :budget_categories, through: :budgets
+  has_many :alerts, dependent: :destroy
 
   validates :locale, inclusion: { in: I18n.available_locales.map(&:to_s) }
   validates :date_format, inclusion: { in: DATE_FORMATS.map(&:last) }
@@ -112,6 +113,10 @@ class Family < ApplicationRecord
       ts = entries.maximum(:updated_at)
       ts.present? ? ts.to_i : 0
     end
+  end
+
+  def large_transaction_alerts_enabled?
+    large_transaction_threshold.present? && large_transaction_threshold > 0
   end
 
   def self_hoster?

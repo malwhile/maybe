@@ -1,0 +1,24 @@
+budget_exceeded_one:
+  family: one
+  alert_type: budget_exceeded
+  alertable_type: BudgetCategory
+  alertable_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  metadata:
+    category_name: Groceries
+    budgeted_spending: "500.00"
+    actual_spending: "650.00"
+    currency: USD
+    budget_month: "March 2026"
+
+large_transaction_one:
+  family: one
+  alert_type: large_transaction
+  alertable_type: Entry
+  alertable_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  metadata:
+    entry_name: "Expensive Coffee"
+    amount: "100.00"
+    currency: USD
+    threshold: "50.00"
+    date: "2026-03-23"
+    account_name: Checking Account
