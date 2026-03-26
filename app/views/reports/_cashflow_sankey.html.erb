@@ -5,7 +5,7 @@
       Cash Flow
     </h2>
 
-    <%= form_with url: reports_cashflow_path, method: :get, data: { controller: "auto-submit-form", turbo_frame: "cashflow_sankey_section" } do |form| %>
+    <%= form_with url: cashflow_reports_path, method: :get, data: { controller: "auto-submit-form", turbo_frame: "cashflow_sankey_section" } do |form| %>
       <%= form.select :period,
                 Period.as_options,
                 { selected: period.key },
