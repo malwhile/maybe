@@ -5,16 +5,27 @@ export default class extends Controller {
 
   copy(event) {
     event.preventDefault();
-    if (this.sourceTarget?.textContent) {
-      navigator.clipboard
-        .writeText(this.sourceTarget.textContent)
-        .then(() => {
-          this.showSuccess();
-        })
-        .catch((error) => {
-          console.error("Failed to copy text: ", error);
-        });
+    if (!this.sourceTarget) {
+      console.error("Clipboard: source target not found");
+      return;
     }
+
+    const text = this.sourceTarget.textContent;
+    if (!text) {
+      console.error("Clipboard: source target has no text content");
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        console.log("Clipboard: Successfully copied text");
+        this.showSuccess();
+      })
+      .catch((error) => {
+        console.error("Clipboard: Failed to copy text:", error);
+        alert("Failed to copy to clipboard. This may be a browser permission issue.\n\nError: " + error.message);
+      });
   }
 
   showSuccess() {
