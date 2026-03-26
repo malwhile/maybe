@@ -1,0 +1,21 @@
+<% content_for :page_header do %>
+  <div class="space-y-1">
+    <h1 class="text-xl lg:text-3xl font-medium text-primary">Net Worth</h1>
+    <p class="text-sm lg:text-base text-secondary">Track your total net worth over time</p>
+  </div>
+<% end %>
+
+<div class="w-full space-y-6 pb-24">
+  <% if Current.family.accounts.any? %>
+    <section class="bg-container py-4 rounded-xl shadow-border-xs">
+      <%= render partial: "pages/dashboard/net_worth_chart", locals: {
+        balance_sheet: @balance_sheet,
+        period: Period.last_year
+      } %>
+    </section>
+  <% else %>
+    <section>
+      <%= render "pages/dashboard/no_accounts_graph_placeholder" %>
+    </section>
+  <% end %>
+</div>

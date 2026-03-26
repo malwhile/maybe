@@ -1,0 +1,23 @@
+<% content_for :page_header do %>
+  <div class="space-y-1">
+    <h1 class="text-xl lg:text-3xl font-medium text-primary">Cash Flow</h1>
+    <p class="text-sm lg:text-base text-secondary">Understand your income and spending patterns</p>
+  </div>
+<% end %>
+
+<div class="w-full space-y-6 pb-24">
+  <% if Current.family.accounts.any? %>
+    <%= turbo_frame_tag "cashflow_sankey_section" do %>
+      <section class="bg-container py-4 rounded-xl shadow-border-xs">
+        <%= render partial: "cashflow_sankey", locals: {
+          sankey_data: @cashflow_sankey_data,
+          period: @period
+        } %>
+      </section>
+    <% end %>
+  <% else %>
+    <section>
+      <%= render "pages/dashboard/no_accounts_graph_placeholder" %>
+    </section>
+  <% end %>
+</div>

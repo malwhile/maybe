@@ -33,6 +33,14 @@ Rails.application.routes.draw do
   get "changelog", to: "pages#changelog"
   get "feedback", to: "pages#feedback"
 
+  resources :reports, only: :index do
+    collection do
+      get :net_worth
+      get :balance_sheet
+      get :cashflow
+    end
+  end
+
   resource :current_session, only: %i[update]
 
   resource :registration, only: %i[new create]

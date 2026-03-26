@@ -1,0 +1,18 @@
+<% content_for :page_header do %>
+  <div class="space-y-1">
+    <h1 class="text-xl lg:text-3xl font-medium text-primary">Balance Sheet</h1>
+    <p class="text-sm lg:text-base text-secondary">See your assets and liabilities breakdown</p>
+  </div>
+<% end %>
+
+<div class="w-full space-y-6 pb-24">
+  <% if Current.family.accounts.any? %>
+    <section>
+      <%= render "pages/dashboard/balance_sheet", balance_sheet: @balance_sheet %>
+    </section>
+  <% else %>
+    <section>
+      <%= render "pages/dashboard/no_accounts_graph_placeholder" %>
+    </section>
+  <% end %>
+</div>
