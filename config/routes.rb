@@ -38,6 +38,7 @@ Rails.application.routes.draw do
       get :net_worth
       get :balance_sheet
       get :cashflow
+      get :net_income
     end
   end
 

@@ -1,0 +1,106 @@
+<% content_for :page_header do %>
+  <div class="space-y-1">
+    <h1 class="text-xl lg:text-3xl font-medium text-primary">Net Income</h1>
+    <p class="text-sm lg:text-base text-secondary">Compare your income and expenses over time</p>
+  </div>
+<% end %>
+
+<div class="w-full space-y-6 pb-24">
+  <%# ── Filter bar ─────────────────────────────────────────── %>
+  <%= form_with url: net_income_reports_path, method: :get,
+                data: { controller: "auto-submit-form" } do |f| %>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <%# Period select %>
+      <%= f.select :period, Period.as_options,
+                   { selected: @period.key, include_blank: false },
+                   data: { "auto-submit-form-target": "auto" },
+                   class: "bg-container border border-secondary font-medium rounded-lg px-3 py-2 text-sm pr-7 cursor-pointer text-primary focus:outline-hidden focus:ring-0" %>
+
+      <%# Account multi-select checkboxes — rendered as a disclosure %>
+      <details class="relative">
+        <summary class="bg-container border border-secondary font-medium rounded-lg px-3 py-2 text-sm cursor-pointer text-primary list-none flex items-center gap-2">
+          <%= icon("building-2", size: "sm") %>
+          <% if @account_ids.present? %>
+            <%= "#{@account_ids.size} account#{'s' if @account_ids.size != 1}" %>
+          <% else %>
+            All accounts
+          <% end %>
+          <%= icon("chevron-down", size: "sm") %>
+        </summary>
+        <div class="absolute top-full left-0 mt-1 z-10 bg-container border border-secondary rounded-xl p-3 shadow-sm min-w-48 space-y-1">
+          <% @accounts.each do |account| %>
+            <label class="flex items-center gap-2 text-sm text-primary cursor-pointer p-1">
+              <%= f.check_box :account_ids,
+                              { multiple: true,
+                                checked: @account_ids&.include?(account.id.to_s),
+                                data: { "auto-submit-form-target": "auto" } },
+                              account.id,
+                              nil %>
+              <%= account.name %>
+            </label>
+          <% end %>
+        </div>
+      </details>
+
+      <%# View toggle: totals vs breakdown %>
+      <div class="flex items-center rounded-lg border border-secondary overflow-hidden text-sm font-medium">
+        <%= link_to "Summary",
+                    net_income_reports_path(period: @period.key, account_ids: @account_ids, view: "totals"),
+                    class: "px-3 py-2 #{@view == 'totals' ? 'bg-primary text-white' : 'bg-container text-primary'}" %>
+        <%= link_to "Breakdown",
+                    net_income_reports_path(period: @period.key, account_ids: @account_ids, view: "breakdown"),
+                    class: "px-3 py-2 #{@view == 'breakdown' ? 'bg-primary text-white' : 'bg-container text-primary'}" %>
+      </div>
+    </div>
+  <% end %>
+
+  <%# ── Turbo frame (re-renders on filter change) ───────────── %>
+  <%= turbo_frame_tag "net_income_section" do %>
+    <% if Current.family.accounts.any? %>
+      <%# Summary cards %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <%# Income card %>
+        <div class="bg-container rounded-xl p-4 shadow-border-xs space-y-1">
+          <p class="text-sm text-secondary">Total Income</p>
+          <p class="text-2xl font-medium text-primary font-mono">
+            <%= format_money(Money.new(@income_totals.total, Current.family.currency)) %>
+          </p>
+          <%= render partial: "shared/trend_change",
+                     locals: { trend: @income_trend, comparison_label: @period.comparison_label } %>
+        </div>
+
+        <%# Expenses card %>
+        <div class="bg-container rounded-xl p-4 shadow-border-xs space-y-1">
+          <p class="text-sm text-secondary">Total Expenses</p>
+          <p class="text-2xl font-medium text-primary font-mono">
+            <%= format_money(Money.new(@expense_totals.total, Current.family.currency)) %>
+          </p>
+          <%= render partial: "shared/trend_change",
+                     locals: { trend: @expense_trend, comparison_label: @period.comparison_label } %>
+        </div>
+
+        <%# Net Income card %>
+        <% net_money = Money.new(@income_totals.total - @expense_totals.total, Current.family.currency) %>
+        <div class="bg-container rounded-xl p-4 shadow-border-xs space-y-1">
+          <p class="text-sm text-secondary">Net Income</p>
+          <p class="text-2xl font-medium font-mono" style="color: <%= @net_trend.color %>">
+            <%= format_money(net_money) %>
+          </p>
+          <%= render partial: "shared/trend_change",
+                     locals: { trend: @net_trend, comparison_label: @period.comparison_label } %>
+        </div>
+      </div>
+
+      <%# Breakdown tables (only when view=breakdown) %>
+      <% if @view == "breakdown" %>
+        <%= render partial: "net_income_breakdown",
+                   locals: { income_totals: @income_totals, expense_totals: @expense_totals } %>
+      <% end %>
+    <% else %>
+      <section>
+        <%= render "pages/dashboard/no_accounts_graph_placeholder" %>
+      </section>
+    <% end %>
+  <% end %>
+</div>

@@ -24,12 +24,12 @@ class IncomeStatement
     )
   end
 
-  def expense_totals(period: Period.current_month)
-    build_period_total(classification: "expense", period: period)
+  def expense_totals(period: Period.current_month, account_ids: nil)
+    build_period_total(classification: "expense", period: period, account_ids: account_ids)
   end
 
-  def income_totals(period: Period.current_month)
-    build_period_total(classification: "income", period: period)
+  def income_totals(period: Period.current_month, account_ids: nil)
+    build_period_total(classification: "income", period: period, account_ids: account_ids)
   end
 
   def median_expense(interval: "month", category: nil)
@@ -61,8 +61,10 @@ class IncomeStatement
       @categories ||= family.categories.all.to_a
     end
 
-    def build_period_total(classification:, period:)
-      totals = totals_query(transactions_scope: family.transactions.visible.in_period(period)).select { |t| t.classification == classification }
+    def build_period_total(classification:, period:, account_ids: nil)
+      scope = family.transactions.visible.in_period(period)
+      scope = scope.where(account_id: account_ids) if account_ids.present?
+      totals = totals_query(transactions_scope: scope).select { |t| t.classification == classification }
       classification_total = totals.sum(&:total)
 
       uncategorized_category = family.categories.uncategorized

@@ -35,4 +35,14 @@
       <%= icon("activity", class: "text-secondary group-hover:text-primary transition-colors") %>
     </div>
   <% end %>
+
+  <%= link_to net_income_reports_path, class: "group bg-container rounded-xl p-6 shadow-border-xs hover:shadow-xs transition-shadow" do %>
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <h2 class="text-lg font-medium text-primary">Net Income</h2>
+        <p class="text-sm text-secondary">Compare your income and expenses over time</p>
+      </div>
+      <%= icon("wallet", class: "text-secondary group-hover:text-primary transition-colors") %>
+    </div>
+  <% end %>
 </div>

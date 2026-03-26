@@ -1,0 +1,77 @@
+<%# locals: (income_totals:, expense_totals:) %>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <%# Income breakdown %>
+  <div class="bg-container rounded-xl p-4 shadow-border-xs">
+    <h3 class="text-sm font-medium text-secondary mb-4">Income by Source</h3>
+
+    <% visible_income = income_totals.category_totals.reject { |ct| ct.total.zero? || ct.category.subcategory? }.sort_by { |ct| -ct.total } %>
+    <% if visible_income.any? %>
+      <div class="space-y-3">
+        <% visible_income.each do |ct| %>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full shrink-0"
+                     style="background-color: <%= ct.category.color.presence || 'var(--color-gray)' %>"></div>
+                <span class="text-primary"><%= ct.category.name %></span>
+              </div>
+              <div class="flex items-center gap-3 text-right">
+                <span class="text-secondary text-xs"><%= number_to_percentage(ct.weight, precision: 0) %></span>
+                <span class="font-mono text-primary">
+                  <%= format_money(Money.new(ct.total, ct.currency)) %>
+                </span>
+              </div>
+            </div>
+            <div class="bg-surface rounded-full h-1.5">
+              <div class="h-1.5 rounded-full"
+                   style="width: <%= ct.weight %>%; background-color: <%= ct.category.color.presence || 'var(--color-gray)' %>"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="py-8 flex flex-col items-center gap-2">
+        <%= render DS::FilledIcon.new(variant: :container, icon: "wallet") %>
+        <p class="text-sm text-secondary">No income for this period</p>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Expense breakdown %>
+  <div class="bg-container rounded-xl p-4 shadow-border-xs">
+    <h3 class="text-sm font-medium text-secondary mb-4">Expenses by Category</h3>
+
+    <% visible_expense = expense_totals.category_totals.reject { |ct| ct.total.zero? || ct.category.subcategory? }.sort_by { |ct| -ct.total } %>
+    <% if visible_expense.any? %>
+      <div class="space-y-3">
+        <% visible_expense.each do |ct| %>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full shrink-0"
+                     style="background-color: <%= ct.category.color.presence || 'var(--color-gray)' %>"></div>
+                <span class="text-primary"><%= ct.category.name %></span>
+              </div>
+              <div class="flex items-center gap-3 text-right">
+                <span class="text-secondary text-xs"><%= number_to_percentage(ct.weight, precision: 0) %></span>
+                <span class="font-mono text-primary">
+                  <%= format_money(Money.new(ct.total, ct.currency)) %>
+                </span>
+              </div>
+            </div>
+            <div class="bg-surface rounded-full h-1.5">
+              <div class="h-1.5 rounded-full"
+                   style="width: <%= ct.weight %>%; background-color: <%= ct.category.color.presence || 'var(--color-gray)' %>"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="py-8 flex flex-col items-center gap-2">
+        <%= render DS::FilledIcon.new(variant: :container, icon: "shopping-cart") %>
+        <p class="text-sm text-secondary">No expenses for this period</p>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -35,6 +35,35 @@ class ReportsController < ApplicationController
     @breadcrumbs = [ [ "Home", root_path ], [ "Reports", reports_path ], [ "Cash Flow", nil ] ]
   end
 
+  def net_income
+    @view        = params[:view].presence_in(%w[totals breakdown]) || "breakdown"
+    @account_ids = params[:account_ids].presence
+    @accounts    = Current.family.accounts.order(:name)
+
+    stmt = Current.family.income_statement
+    @income_totals  = stmt.income_totals(period: @period, account_ids: @account_ids)
+    @expense_totals = stmt.expense_totals(period: @period, account_ids: @account_ids)
+
+    # Previous period for trend comparison
+    days = (@period.end_date - @period.start_date).to_i + 1
+    prev_period     = Period.new(start_date: @period.start_date - days, end_date: @period.start_date - 1)
+    prev_income     = stmt.income_totals(period: prev_period, account_ids: @account_ids)
+    prev_expense    = stmt.expense_totals(period: prev_period, account_ids: @account_ids)
+
+    currency = Current.family.currency
+    @income_trend  = Trend.new(current: Money.new(@income_totals.total, currency),
+                                previous: Money.new(prev_income.total, currency),
+                                favorable_direction: "up")
+    @expense_trend = Trend.new(current: Money.new(@expense_totals.total, currency),
+                                previous: Money.new(prev_expense.total, currency),
+                                favorable_direction: "down")
+    @net_trend     = Trend.new(current: Money.new(@income_totals.total - @expense_totals.total, currency),
+                                previous: Money.new(prev_income.total - prev_expense.total, currency),
+                                favorable_direction: "up")
+
+    @breadcrumbs = [ [ "Home", root_path ], [ "Reports", reports_path ], [ "Net Income", nil ] ]
+  end
+
   private
     def build_cashflow_sankey_data(income_totals, expense_totals, currency_symbol)
       nodes = []
