@@ -41,6 +41,7 @@ export default class extends Controller {
     const sankeyGenerator = sankey()
       .nodeWidth(this.nodeWidthValue)
       .nodePadding(this.nodePaddingValue)
+      .nodeSort(null)
       .extent([
         [16, 16],
         [width - 16, height - 16],
