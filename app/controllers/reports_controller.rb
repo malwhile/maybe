@@ -37,8 +37,14 @@ class ReportsController < ApplicationController
 
   def net_income
     @view        = params[:view].presence_in(%w[totals breakdown]) || "breakdown"
-    @account_ids = params[:account_ids].presence
-    @accounts    = Current.family.accounts.order(:name)
+    @accounts    = Current.family.accounts.visible.order(:name)
+
+    # Only allow filtering by visible accounts
+    provided_ids = params[:account_ids].presence
+    @account_ids = if provided_ids.present?
+      visible_ids = @accounts.pluck(:id).map(&:to_s)
+      provided_ids.select { |id| visible_ids.include?(id) }
+    end
 
     stmt = Current.family.income_statement
     @income_totals  = stmt.income_totals(period: @period, account_ids: @account_ids)

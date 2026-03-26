@@ -57,7 +57,7 @@
 
   <%# ── Turbo frame (re-renders on filter change) ───────────── %>
   <%= turbo_frame_tag "net_income_section" do %>
-    <% if Current.family.accounts.any? %>
+    <% if @accounts.any? %>
       <%# Summary cards %>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <%# Income card %>
