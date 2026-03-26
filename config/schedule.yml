@@ -18,3 +18,9 @@ run_security_health_checks:
   class: "SecurityHealthCheckJob"
   queue: "scheduled"
   description: "Runs security health checks to detect issues with security data"
+
+budget_alert_check:
+  cron: "0 8 * * *" # 8:00 AM UTC daily
+  class: "BudgetAlertCheckJob"
+  queue: "default"
+  description: "Daily check for budget category overages and emit alerts"

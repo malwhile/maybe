@@ -63,7 +63,13 @@ Rails.application.routes.draw do
     resource :billing, only: :show
     resource :security, only: :show
     resource :api_key, only: [ :show, :new, :create, :destroy ]
+    resource :feed, only: [ :show, :create, :destroy, :update ]
   end
+
+  # Alert feed — uses HTTP Basic Auth, not session auth
+  get "alerts", to: "alert_feeds#show", as: :alert_feed
+  get "alerts.atom", to: "alert_feeds#show", format: :atom
+  get "alerts.rss", to: "alert_feeds#show", format: :atom
 
   resource :subscription, only: %i[new show create] do
     collection do

@@ -1,0 +1,185 @@
+<%= content_for :page_title, "Alert Feed" %>
+
+<% if @plain_key.present? %>
+  <%= settings_section title: "Feed Key Created Successfully", subtitle: "Your new alert feed key has been generated successfully." do %>
+    <div class="space-y-4">
+      <div class="p-3 shadow-border-xs bg-container rounded-lg">
+        <div class="flex items-start gap-3">
+          <%= render DS::FilledIcon.new(
+            icon: "check-circle",
+            rounded: true,
+            size: "lg",
+            variant: :success
+          ) %>
+          <div class="flex-1">
+            <h3 class="font-medium text-primary">Feed Key Created!</h3>
+            <p class="text-secondary text-sm mt-1">Your new RSS feed key has been created and is ready to use. This key is shown only once.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-surface-inset rounded-xl p-4">
+        <h4 class="font-medium text-primary mb-3">Your Feed Key</h4>
+        <p class="text-secondary text-sm mb-3">Copy and store this key securely. You'll need it to authenticate your RSS reader.</p>
+
+        <div class="bg-container rounded-lg p-3 border border-primary" data-controller="clipboard">
+          <div class="flex items-center justify-between gap-3">
+            <code class="font-mono text-sm text-primary break-all" data-clipboard-target="source"><%= @plain_key %></code>
+            <%= render DS::Button.new(
+              text: "Copy Key",
+              variant: "ghost",
+              icon: "copy",
+              data: { action: "clipboard#copy" }
+            ) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-4 border-t border-primary">
+        <%= render DS::Link.new(
+          text: "Continue to Feed Settings",
+          href: settings_feed_path,
+          variant: "primary"
+        ) %>
+      </div>
+    </div>
+  <% end %>
+<% elsif Current.user.rss_feed_key.present? %>
+  <%= settings_section title: "Your Alert Feed", subtitle: "Subscribe to your financial alerts in any RSS reader." do %>
+    <div class="space-y-4">
+      <div class="p-3 shadow-border-xs bg-container rounded-lg flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <%= render DS::FilledIcon.new(
+            icon: "rss",
+            rounded: true,
+            size: "lg"
+          ) %>
+
+          <div class="text-sm space-y-1">
+            <p class="text-primary font-medium">Alert Feed</p>
+            <p class="text-secondary">
+              Created <%= time_ago_in_words(Current.user.updated_at) %> ago
+            </p>
+          </div>
+        </div>
+
+        <div class="rounded-md bg-success px-2 py-1">
+          <p class="text-success-foreground font-medium text-xs">Active</p>
+        </div>
+      </div>
+
+      <div class="bg-surface-inset rounded-xl p-4">
+        <h4 class="font-medium text-primary mb-3">Feed URL</h4>
+        <p class="text-secondary text-sm mb-3">Use this URL in your RSS reader. Authentication uses your email and the feed key below.</p>
+
+        <div class="bg-container rounded-lg p-3 border border-primary" data-controller="clipboard">
+          <div class="flex items-center justify-between gap-3">
+            <code class="font-mono text-sm text-primary break-all" data-clipboard-target="source"><%= @feed_url %></code>
+            <%= render DS::Button.new(
+              text: "Copy URL",
+              variant: "ghost",
+              icon: "copy",
+              data: { action: "clipboard#copy" }
+            ) %>
+          </div>
+        </div>
+
+        <p class="text-secondary text-xs mt-3">
+          Username: <strong><%= Current.user.email %></strong> &nbsp;&middot;&nbsp;
+          Password: your feed key (generated when you created the key)
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-primary">
+        <%= render DS::Button.new(
+          text: "Regenerate Key",
+          href: settings_feed_path,
+          method: :post,
+          variant: "secondary",
+          data: {
+            turbo_confirm: "This will invalidate your current feed key. Continue?"
+          }
+        ) %>
+
+        <%= render DS::Button.new(
+          text: "Revoke Key",
+          href: settings_feed_path,
+          method: :delete,
+          variant: "destructive",
+          data: {
+            turbo_confirm: "This will disable your feed. Continue?"
+          }
+        ) %>
+      </div>
+    </div>
+  <% end %>
+<% else %>
+  <%= settings_section title: "Create Your Alert Feed", subtitle: "Subscribe to financial alerts in any RSS reader" do %>
+    <div class="space-y-4">
+      <div class="p-3 shadow-border-xs bg-container rounded-lg">
+        <div class="flex items-start gap-3">
+          <%= render DS::FilledIcon.new(
+            icon: "rss",
+            rounded: true,
+            size: "lg"
+          ) %>
+          <div class="flex-1">
+            <h3 class="font-medium text-primary">Subscribe to your financial alerts</h3>
+            <p class="text-secondary text-sm mt-1">Generate a feed key to receive alerts about budget overages, large transactions, and rule activity in your favorite RSS reader.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-surface-inset rounded-xl p-4">
+        <h4 class="font-medium text-primary mb-3">What you'll receive:</h4>
+        <ul class="space-y-2 text-sm text-secondary">
+          <li class="flex items-start gap-2">
+            <%= icon("check", class: "w-4 h-4 text-primary mt-0.5") %>
+            <span>Budget category overspend alerts</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <%= icon("check", class: "w-4 h-4 text-primary mt-0.5") %>
+            <span>Large transaction notifications</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <%= icon("check", class: "w-4 h-4 text-primary mt-0.5") %>
+            <span>Rule application updates</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="flex justify-start">
+        <%= render DS::Button.new(
+          text: "Generate Feed Key",
+          href: settings_feed_path,
+          method: :post,
+          variant: "primary"
+        ) %>
+      </div>
+    </div>
+  <% end %>
+<% end %>
+
+<%= settings_section title: "Alert Settings", subtitle: "Configure what triggers an alert." do %>
+  <%= form_with url: settings_feed_path, method: :patch, local: true do |f| %>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-primary mb-1">Large Transaction Threshold</label>
+        <p class="text-secondary text-xs mb-3">Alert when any transaction exceeds this amount. Leave blank to disable.</p>
+        <input type="number"
+               name="family[large_transaction_threshold]"
+               value="<%= Current.family.large_transaction_threshold %>"
+               placeholder="e.g. 500"
+               step="0.01"
+               min="0"
+               class="w-full px-3 py-2 border border-primary rounded-lg bg-container text-primary placeholder-secondary" />
+        <p class="text-secondary text-xs mt-2">In <%= Current.family.currency %></p>
+      </div>
+      <%= render DS::Button.new(
+        text: "Save Settings",
+        variant: "primary",
+        type: "submit"
+      ) %>
+    </div>
+  <% end %>
+<% end %>

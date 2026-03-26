@@ -34,6 +34,10 @@ class Entry < ApplicationRecord
     )
   }
 
+  after_create_commit :check_large_transaction_alert, if: :transaction?
+  after_create_commit :enqueue_budget_alert_check, if: :transaction?
+  after_destroy_commit :enqueue_budget_alert_check, if: :transaction?
+
   def classification
     amount.negative? ? "income" : "expense"
   end
@@ -96,4 +100,28 @@ class Entry < ApplicationRecord
       all.size
     end
   end
+
+  private
+
+    def check_large_transaction_alert
+      return unless account.family.large_transaction_alerts_enabled?
+      return unless amount.abs >= account.family.large_transaction_threshold
+
+      Alert.record_large_transaction!(
+        family: account.family,
+        entry: self,
+        metadata: {
+          entry_name: name,
+          amount: amount.to_s,
+          currency: currency,
+          threshold: account.family.large_transaction_threshold.to_s,
+          date: date.to_s,
+          account_name: account.name
+        }
+      )
+    end
+
+    def enqueue_budget_alert_check
+      BudgetAlertCheckJob.perform_later(account.family_id)
+    end
 end

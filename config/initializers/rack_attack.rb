@@ -32,6 +32,11 @@ class Rack::Attack
     request.ip if request.path.start_with?("/api/")
   end
 
+  # Throttle alert feed requests
+  throttle("alert_feed", limit: 60, period: 1.minute) do |request|
+    request.ip if request.path.start_with?("/alerts")
+  end
+
   # Block requests that appear to be malicious
   blocklist("block malicious requests") do |request|
     # Block requests with suspicious user agents
