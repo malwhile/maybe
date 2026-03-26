@@ -18,11 +18,13 @@ export default class extends Controller {
   }
 
   showSuccess() {
-    this.iconDefaultTarget.classList.add("hidden");
-    this.iconSuccessTarget.classList.remove("hidden");
-    setTimeout(() => {
-      this.iconDefaultTarget.classList.remove("hidden");
-      this.iconSuccessTarget.classList.add("hidden");
-    }, 3000);
+    if (this.hasIconDefaultTarget && this.hasIconSuccessTarget) {
+      this.iconDefaultTarget.classList.add("hidden");
+      this.iconSuccessTarget.classList.remove("hidden");
+      setTimeout(() => {
+        this.iconDefaultTarget.classList.remove("hidden");
+        this.iconSuccessTarget.classList.add("hidden");
+      }, 3000);
+    }
   }
 }
